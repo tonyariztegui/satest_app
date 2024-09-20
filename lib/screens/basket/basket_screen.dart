@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:satest_app/widgets/product_widgets/product_tile.dart'; // Utilisation de ProductTile
-import 'package:satest_app/widgets/common_widgets/custom_button.dart';// Pour le bouton "Checkout"
+import 'package:satest_app/widgets/common_widgets/custom_button.dart'; // Pour le bouton "Checkout"
 import 'package:satest_app/widgets/common_widgets/bottom_navigation_bar.dart'; // Assurez-vous que ce chemin est correct
+import 'package:satest_app/screens/payment/checkout_screen.dart.dart'; // Assurez-vous d'importer la page de paiement
 
 class BasketScreen extends StatefulWidget {
-  final String? username; // Ajouter cette variable pour vérifier si l'utilisateur est connecté
+  final String? username; // Vérification si l'utilisateur est connecté
 
   const BasketScreen({super.key, this.username});
 
@@ -13,7 +14,7 @@ class BasketScreen extends StatefulWidget {
 }
 
 class _BasketScreenState extends State<BasketScreen> {
-  // Mock data for basket items
+  // Données fictives pour les articles du panier
   List<Map<String, dynamic>> basketItems = [
     {
       'name': 'T-Shirt',
@@ -31,11 +32,7 @@ class _BasketScreenState extends State<BasketScreen> {
 
   // Calcul du total des articles dans le panier
   double _calculateTotal() {
-    double total = 0;
-    for (var item in basketItems) {
-      total += item['price'] * item['quantity'];
-    }
-    return total;
+    return basketItems.fold(0, (total, item) => total + item['price'] * item['quantity']);
   }
 
   @override
@@ -43,7 +40,7 @@ class _BasketScreenState extends State<BasketScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Basket'),
-        automaticallyImplyLeading: false, // Enlève le bouton "Back"
+        automaticallyImplyLeading: false, // Retire le bouton "Back"
       ),
       body: Column(
         children: [
@@ -93,17 +90,28 @@ class _BasketScreenState extends State<BasketScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text('€${_calculateTotal().toStringAsFixed(2)}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(
+                      '€${_calculateTotal().toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
                 CustomButton(
-                  icon: Icons.shopping_cart, // Ajout d'une icône facultative
+                  icon: Icons.shopping_cart,
                   text: 'Checkout',
                   onPressed: basketItems.isEmpty
                       ? null // Désactive le bouton si le panier est vide
                       : () {
-                          Navigator.pushNamed(context, '/checkout');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CheckoutScreen(
+                                username: widget.username,
+                                total: _calculateTotal(),
+                              ),
+                            ),
+                          );
                         },
                 ),
               ],
@@ -111,7 +119,33 @@ class _BasketScreenState extends State<BasketScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(username: widget.username),
+      bottomNavigationBar: BottomNavBar(
+        username: widget.username,
+        currentIndex: 3, // L'index de la page Basket est 3
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushReplacementNamed(context, '/home', arguments: widget.username);
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/favorites');
+              break;
+            case 3:
+              // Nous sommes déjà sur la page Basket, aucune action nécessaire
+              break;
+            case 4:
+              if (widget.username != null) {
+                Navigator.pushNamed(context, '/profile', arguments: widget.username);
+              } else {
+                Navigator.pushNamed(context, '/sign_in');
+              }
+              break;
+          }
+        },
+      ),
     );
   }
 }

@@ -12,7 +12,7 @@ class HelpFAQScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: const [
+          children: [
             // Order related queries section
             ExpansionTile(
               title: Text(
@@ -21,37 +21,31 @@ class HelpFAQScreen extends StatelessWidget {
               ),
               children: [
                 ListTile(
-                  title: Text('Orders'),
-                  subtitle: Text('How can I track my order?'),
+                  title: Text('How can I track my order?'),
                 ),
                 ListTile(
-                  title: Text('Payments'),
-                  subtitle: Text('What payment methods do you accept?'),
+                  title: Text('What payment methods do you accept?'),
                 ),
                 ListTile(
-                  title: Text('Returns and Refunds'),
-                  subtitle: Text('How do I return an item?'),
+                  title: Text('How do I return an item?'),
                 ),
                 ListTile(
-                  title: Text('Delivery'),
-                  subtitle: Text('When will my order arrive?'),
+                  title: Text('When will my order arrive?'),
                 ),
               ],
             ),
-            // Non-order related queries section
+            // Account related queries section
             ExpansionTile(
               title: Text(
-                'Non-Order Related Queries',
+                'Account Related Queries',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               children: [
                 ListTile(
-                  title: Text('My Account'),
-                  subtitle: Text('How do I reset my password?'),
+                  title: Text('How do I reset my password?'),
                 ),
                 ListTile(
-                  title: Text('Profile'),
-                  subtitle: Text('How do I update my profile information?'),
+                  title: Text('How do I update my profile information?'),
                 ),
               ],
             ),
@@ -70,6 +64,12 @@ class HelpFAQScreen extends StatelessWidget {
                 ),
                 ListTile(
                   title: Text('Where are your products made?'),
+                ),
+                ListTile(
+                  title: Text('Do you offer international shipping?'),
+                ),
+                ListTile(
+                  title: Text('How can I provide feedback?'),
                 ),
               ],
             ),

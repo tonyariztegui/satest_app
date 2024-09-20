@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 
-class CustomBottomNavigationBar extends StatelessWidget {
+class BottomNavBar extends StatelessWidget {
   final String? username;
+  final Function(int) onTap;
+  final int currentIndex;
 
-  const CustomBottomNavigationBar({super.key, this.username});
+  const BottomNavBar({
+    super.key,
+    required this.username,
+    required this.onTap,
+    required this.currentIndex,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: Colors.white,
       iconSize: 30.0,
       selectedItemColor: Colors.green,
       unselectedItemColor: Colors.grey,
+      currentIndex: currentIndex,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
@@ -35,32 +42,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
         ),
       ],
       onTap: (index) {
-        _navigateToPage(context, index);
+        onTap(index);
       },
     );
-  }
-
-  void _navigateToPage(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/home', arguments: username);
-        break;
-      case 1:
-        Navigator.pushNamed(context, '/search');
-        break;
-      case 2:
-        Navigator.pushNamed(context, '/favorites');
-        break;
-      case 3:
-        Navigator.pushNamed(context, '/basket');
-        break;
-      case 4:
-        if (username != null) {
-          Navigator.pushNamed(context, '/profile', arguments: username);
-        } else {
-          Navigator.pushNamed(context, '/sign_in');
-        }
-        break;
-    }
   }
 }

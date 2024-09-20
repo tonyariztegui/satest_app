@@ -1,37 +1,53 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.11.11.158:1337',  // URL de votre API Strapi
-    connectTimeout: const Duration(seconds: 5),
-    receiveTimeout: const Duration(seconds: 3),
-  ));
+  static const String _baseUrl = 'http://10.11.11.158:1337/api';
+  final Dio _dio = Dio();
 
-  // Méthode pour récupérer les informations du profil utilisateur
-  Future<Map<String, dynamic>> fetchUserProfile() async {
+  ApiService() {
+    _dio.options.baseUrl = _baseUrl;
+    _dio.options.headers['Content-Type'] = 'application/json';
+  }
+
+  // Authentification (connexion utilisateur)
+  Future<Map<String, dynamic>> signIn(String identifier, String password) async {
     try {
-      final response = await _dio.get('/users/me');  // Endpoint pour obtenir le profil utilisateur
-
-      if (response.statusCode == 200) {
-        return response.data as Map<String, dynamic>;
-      } else {
-        throw Exception('Failed to load user profile');
-      }
-    } on DioException catch (e) {
-      throw Exception('Failed to load user profile: ${e.message}');
+      final response = await _dio.post('/auth/local', data: jsonEncode({
+        "identifier": identifier,
+        "password": password,
+      }));
+      return response.data;
+    } on DioError catch (e) {
+      throw Exception('Failed to login: ${e.response?.data}');
     }
   }
 
-  // Méthode pour mettre à jour les informations du profil utilisateur
-  Future<void> updateUserProfile(Map<String, dynamic> userData) async {
+  // Création de compte utilisateur
+  Future<Map<String, dynamic>> signUp(String username, String email, String password) async {
     try {
-      final response = await _dio.put('/users/me', data: userData);  // Endpoint pour mettre à jour le profil utilisateur
+      final response = await _dio.post('/auth/local/register', data: jsonEncode({
+        "username": username,
+        "email": email,
+        "password": password,
+      }));
+      return response.data;
+    } on DioError catch (e) {
+      throw Exception('Failed to register: ${e.response?.data}');
+    }
+  }
 
-      if (response.statusCode != 200) {
-        throw Exception('Failed to update user profile');
-      }
-    } on DioException catch (e) {
-      throw Exception('Failed to update user profile: ${e.message}');
+  // Récupération des informations de profil utilisateur
+  Future<Map<String, dynamic>> getUserProfile(String token) async {
+    try {
+      final response = await _dio.get('/users/me', options: Options(
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      ));
+      return response.data;
+    } on DioError catch (e) {
+      throw Exception('Failed to load profile: ${e.response?.data}');
     }
   }
 }

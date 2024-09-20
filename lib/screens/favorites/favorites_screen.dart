@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:satest_app/widgets/common_widgets/bottom_navigation_bar.dart'; // Assurez-vous que ce chemin est correct
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritesScreen extends StatefulWidget {
-  final String? username; // Ajouter cette variable pour vérifier si l'utilisateur est connecté
+  final String? username; // Variable pour vérifier si l'utilisateur est connecté
 
   const FavoritesScreen({super.key, this.username});
 
@@ -11,6 +12,7 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
+  // Liste de produits favoris (mock data)
   List<Map<String, dynamic>> products = [
     {
       'image': 'https://via.placeholder.com/150', // Remplacez par une vraie URL d'image
@@ -26,14 +28,27 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     },
   ];
 
-  Set<int> likedProductIds = {}; // Conserve les ID des produits likés
+  // Set pour gérer les produits likés
+  Set<int> likedProductIds = {};
 
   @override
   void initState() {
     super.initState();
-    // Initialisation des produits likés à partir d'une source de données
-    // Par exemple, charger les produits favoris depuis une base de données ou un stockage local
-    likedProductIds = {0}; // Exemple: initialisation avec le produit avec index 0
+    _loadLikedProducts();
+  }
+
+  // Charger les produits likés depuis SharedPreferences
+  void _loadLikedProducts() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      likedProductIds = prefs.getStringList('likedProducts')?.map(int.parse).toSet() ?? {};
+    });
+  }
+
+  // Sauvegarder les produits likés dans SharedPreferences
+  void _saveLikedProducts() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('likedProducts', likedProductIds.map((id) => id.toString()).toList());
   }
 
   @override
@@ -41,11 +56,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorites'),
-        automaticallyImplyLeading: false, // Enlève le bouton "Back"
+        automaticallyImplyLeading: false, // Retire le bouton "Back"
       ),
       body: Column(
         children: [
-          // Affichage des articles favoris
+          // Affichage du nombre d'articles favoris
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
@@ -53,6 +68,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
+          // Affichage en grille des produits
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(10),
@@ -60,7 +76,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 crossAxisCount: MediaQuery.of(context).size.width < 600 ? 1 : 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: 0.75, // Ajuster la hauteur pour les boutons
+                childAspectRatio: 0.75, // Ajuste la hauteur pour les boutons
               ),
               itemCount: products.length,
               itemBuilder: (context, index) {
@@ -70,12 +86,40 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(username: widget.username),
+      // Utilisation du BottomNavBar avec gestion du currentIndex
+      bottomNavigationBar: BottomNavBar(
+        username: widget.username,
+        currentIndex: 2, // L'index de la page des favoris est 2
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushReplacementNamed(context, '/home', arguments: widget.username);
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+              // Nous sommes déjà sur la page des favoris, pas d'action nécessaire
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/basket');
+              break;
+            case 4:
+              if (widget.username != null) {
+                Navigator.pushNamed(context, '/profile', arguments: widget.username);
+              } else {
+                Navigator.pushNamed(context, '/sign_in');
+              }
+              break;
+          }
+        },
+      ),
     );
   }
 
+  // Construction de la tuile de produit
   Widget _buildProductTile(Map<String, dynamic> product, int index) {
-    final isLiked = likedProductIds.contains(index);
+    final isLiked = likedProductIds.contains(index); // Vérifie si le produit est liké
 
     return Card(
       elevation: 5,
@@ -106,6 +150,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               ),
             ],
           ),
+          // Icône pour liker/déliker un produit
           Positioned(
             top: 8,
             right: 8,
@@ -121,6 +166,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   } else {
                     likedProductIds.add(index);
                   }
+                  _saveLikedProducts(); // Sauvegarde après modification
                 });
               },
             ),

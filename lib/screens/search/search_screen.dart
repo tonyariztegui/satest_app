@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:satest_app/widgets/common_widgets/bottom_navigation_bar.dart'; // Importer le widget
 import 'package:satest_app/screens/search/product_detail_screen.dart'; // Assurez-vous que le chemin est correct
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchScreen extends StatefulWidget {
-  final String? username; // Ajouter cette variable pour vérifier si l'utilisateur est connecté
+  final String? username; // Variable pour vérifier si l'utilisateur est connecté
 
-  SearchScreen({this.username});
+  const SearchScreen({super.key, this.username});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   String selectedCategory = 'All';
   String selectedFilter = 'All'; // Définir la variable selectedFilter
   List<String> categories = ['Women', 'Men', 'Accessories'];
@@ -60,7 +61,7 @@ class _SearchScreenState extends State<SearchScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProductDescriptionScreen(product: product),
+        builder: (context) => ProductDetailsScreen(product: product, username: widget.username),
       ),
     );
   }
@@ -71,12 +72,12 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.search),
-            SizedBox(width: 10),
+            const Icon(Icons.search),
+            const SizedBox(width: 10),
             Expanded(
               child: TextField(
                 controller: _searchController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Search products',
                   border: InputBorder.none,
                 ),
@@ -89,10 +90,9 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         automaticallyImplyLeading: false, // Enlève le bouton "Back"
       ),
-
       body: Column(
         children: [
-          // Categories Section
+          // Section de catégories
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10.0),
             child: Row(
@@ -106,7 +106,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     });
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: selectedCategory == category
                           ? Colors.blue
@@ -129,10 +129,9 @@ class _SearchScreenState extends State<SearchScreen> {
               }).toList(),
             ),
           ),
-
-          // Filters Section
+          // Section des filtres
           ExpansionTile(
-            title: Text(
+            title: const Text(
               'Filter',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -147,8 +146,7 @@ class _SearchScreenState extends State<SearchScreen> {
               _buildFilterOption('New Arrivals'),
             ],
           ),
-
-          // Product Grid
+          // Grille des produits
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(10),
@@ -156,7 +154,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 crossAxisCount: MediaQuery.of(context).size.width < 600 ? 1 : 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: 0.75, // Adjust height to fit buttons
+                childAspectRatio: 0.75, // Ajuster la hauteur pour les boutons
               ),
               itemCount: filteredProducts.length,
               itemBuilder: (context, index) {
@@ -169,9 +167,34 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ],
       ),
-
       // Bottom Navigation Bar
-      bottomNavigationBar: CustomBottomNavigationBar(username: widget.username), // Utiliser le widget personnalisé
+      bottomNavigationBar: BottomNavBar(
+        username: widget.username,
+        currentIndex: 1, // L'indice pour l'écran de recherche
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              Navigator.pushReplacementNamed(context, '/home', arguments: widget.username);
+              break;
+            case 1:
+              // Rester sur la page actuelle car nous sommes sur la page de recherche
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/favorites');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/basket');
+              break;
+            case 4:
+              if (widget.username != null) {
+                Navigator.pushNamed(context, '/profile', arguments: widget.username);
+              } else {
+                Navigator.pushNamed(context, '/sign_in');
+              }
+              break;
+          }
+        },
+      ),
     );
   }
 
@@ -193,14 +216,14 @@ class _SearchScreenState extends State<SearchScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   product['name'],
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
                   '€${product['price']}',
-                  style: TextStyle(fontSize: 14, color: Colors.green),
+                  style: const TextStyle(fontSize: 14, color: Colors.green),
                 ),
               ),
             ],
@@ -211,13 +234,13 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Column(
               children: [
                 IconButton(
-                  icon: Icon(Icons.shopping_cart),
+                  icon: const Icon(Icons.shopping_cart),
                   onPressed: () {
                     // Action pour ajouter au panier
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.favorite_border),
+                  icon: const Icon(Icons.favorite_border),
                   onPressed: () {
                     // Action pour ajouter aux favoris
                   },

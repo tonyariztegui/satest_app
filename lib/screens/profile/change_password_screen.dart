@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({super.key});
-
   @override
   _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
 }
@@ -17,7 +15,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Change Password'),
+        title: Text('Change Password'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -27,20 +25,20 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             children: [
               TextFormField(
                 controller: _oldPasswordController,
-                decoration: const InputDecoration(labelText: 'Old Password'),
+                decoration: InputDecoration(labelText: 'Old Password'),
                 obscureText: true,
               ),
               TextFormField(
                 controller: _newPasswordController,
-                decoration: const InputDecoration(labelText: 'New Password'),
+                decoration: InputDecoration(labelText: 'New Password'),
                 obscureText: true,
               ),
                             TextFormField(
                 controller: _confirmPasswordController,
-                decoration: const InputDecoration(labelText: 'Confirm New Password'),
+                decoration: InputDecoration(labelText: 'Confirm New Password'),
                 obscureText: true,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -51,7 +49,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     } else {
                       // Show error if passwords do not match
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text("New passwords do not match"),
                           backgroundColor: Colors.red,
                         ),
@@ -59,7 +57,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     }
                   }
                 },
-                child: const Text('Change Password'),
+                child: Text('Change Password'),
               ),
             ],
           ),
@@ -73,7 +71,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     // For example, you could call an API with the old and new passwords
     // Mocking a successful password change here
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text('Password changed successfully!'),
         backgroundColor: Colors.green,
       ),
